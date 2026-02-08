@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerHub | Modern Job Board</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Mock Data for Job Listings
+        const initialJobs = [
+            { id: 1, title: "Full Stack Developer", company: "TechFlow", location: "Remote", type: "Full-time", salary: "$120k - $150k" },
+            { id: 2, title: "UI/UX Designer", company: "CreativePulse", location: "New York, NY", type: "Contract", salary: "$80k - $100k" },
+            { id: 3, title: "Data Scientist", company: "DataViz", location: "Austin, TX", type: "Full-time", salary: "$130k - $160k" },
+        ];
+
+        function JobBoardApp() {
+            const [view, setView] = useState('home'); // home, listings, apply
+            const [searchTerm, setSearchTerm] = useState('');
+            const [selectedJob, setSelectedJob] = useState(null);
+
+            // Filter Jobs based on Search Functionality
+            const filteredJobs = initialJobs.filter(job => 
+                job.title.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            // --- Components ---
+
+            const Navbar = () => (
+                <nav class="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-50">
+                    <h1 class="text-2xl font-bold text-indigo-600 cursor-pointer" onClick={() => setView('home')}>CareerHub</h1>
+                    <div class="space-x-6 font-medium">
+                        <button onClick={() => setView('home')} class="hover:text-indigo-600">Home</button>
+                        <button onClick={() => setView('listings')} class="hover:text-indigo-600">Browse Jobs</button>
+                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Login</button>
+                    </div>
+                </nav>
+            );
+
+            const HomePage = () => (
+                <div class="animate-fadeIn">
+                    <section class="gradient-bg text-white py-20 px-6 text-center">
+                        <h2 class="text-5xl font-extrabold mb-4">Find Your Dream Job Today</h2>
+                        <p class="text-xl mb-8 opacity-90">Connecting talented professionals with world-class companies.</p>
+                        <div class="max-w-2xl mx-auto flex shadow-2xl rounded-lg overflow-hidden">
+                            <input 
+                                type="text" 
+                                placeholder="Search by job title..." 
+                                class="w-full p-4 text-gray-800 outline-none"
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <button 
+                                onClick={() => setView('listings')}
+                                class="bg-yellow-400 text-indigo-900 px-8 font-bold hover:bg-yellow-300 transition"
+                            >Search</button>
+                        </div>
+                    </section>
+                    <section class="max-w-6xl mx-auto py-16 px-6">
+                        <h3 class="text-2xl font-bold mb-8 text-gray-800">Featured Job Listings</h3>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            {initialJobs.slice(0, 3).map(job => (
+                                <div key={job.id} class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                                    <span class="text-xs font-bold text-indigo-500 uppercase">{job.type}</span>
+                                    <h4 class="text-lg font-bold mt-2">{job.title}</h4>
+                                    <p class="text-gray-500 text-sm">{job.company} • {job.location}</p>
+                                    <button onClick={() => {setSelectedJob(job); setView('apply');}} class="mt-4 text-indigo-600 font-semibold hover:underline">Apply Now →</button>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                </div>
+            );
+
+            const ListingsPage = () => (
+                <div class="max-w-4xl mx-auto py-12 px-6">
+                    <h2 class="text-3xl font-bold mb-8">Available Openings</h2>
+                    <div class="space-y-4">
+                        {filteredJobs.map(job => (
+                            <div key={job.id} class="bg-white p-6 rounded-lg shadow-sm border flex justify-between items-center hover:border-indigo-300 transition">
+                                <div>
+                                    <h3 class="text-xl font-bold">{job.title}</h3>
+                                    <p class="text-gray-600">{job.company} | <span class="text-green-600 font-medium">{job.salary}</span></p>
+                                    <span class="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded mt-2">{job.location}</span>
+                                </div>
+                                <button 
+                                    onClick={() => {setSelectedJob(job); setView('apply');}}
+                                    class="bg-indigo-50 text-indigo-600 px-6 py-2 rounded-full font-bold hover:bg-indigo-600 hover:text-white transition"
+                                >Details</button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            const ApplicationForm = () => (
+                <div class="max-w-2xl mx-auto py-12 px-6 bg-white shadow-lg rounded-2xl my-10 border border-gray-100">
+                    <button onClick={() => setView('listings')} class="text-indigo-600 mb-4 inline-block">← Back to Listings</button>
+                    <h2 class="text-2xl font-bold mb-2">Apply for {selectedJob?.title}</h2>
+                    <p class="text-gray-500 mb-8">at {selectedJob?.company}</p>
+                    <form class="space-y-4" onSubmit={(e) => { e.preventDefault(); alert('Application Submitted Successfully!'); setView('home'); }}>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Full Name</label>
+                            <input type="text" required class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Email Address</label>
+                            <input type="email" required class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Upload Resume (PDF)</label>
+                            <input type="file" accept=".pdf" required class="w-full border p-2 rounded-lg bg-gray-50" />
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-lg hover:bg-indigo-700 transition shadow-lg">
+                            Submit Application
+                        </button>
+                    </form>
+                </div>
+            );
+
+            return (
+                <div class="min-h-screen">
+                    <Navbar />
+                    {view === 'home' && <HomePage />}
+                    {view === 'listings' && <ListingsPage />}
+                    {view === 'apply' && <ApplicationForm />}
+                    
+                    <footer class="bg-gray-900 text-gray-400 py-10 px-6 mt-20 text-center">
+                        <p>© 2026 CareerHub Job Board. Built for Level 2 Task 1.</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<JobBoardApp />);
+    </script>
+</body>
+</html>
