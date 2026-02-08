@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizSphere | Online Quiz Maker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --accent: #f59e0b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
+
+
+
+        
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Nav Bar styling */
+        nav {
+            background: var(--primary);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 700; cursor: pointer; }
+
+        /* Colorful Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 4rem 5%;
+            text-align: center;
+            border-bottom-left-radius: 50px;
+            border-bottom-right-radius: 50px;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0.5rem;
+        }
+
+        .btn-create { background: var(--accent); color: white; }
+        .btn-take { background: white; color: var(--primary); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+
+        /* Container & Layout */
+        .main-content { padding: 3rem 5%; max-width: 1000px; margin: auto; }
+        .card {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Form Styling for Quiz Creation */
+        .input-group { margin-bottom: 1.5rem; }
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            margin-top: 0.5rem;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+        }
+
+        .hidden { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Quiz UI */
+        .option-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border: 2px solid #f1f5f9;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .option-btn:hover { background: #f1f5f9; border-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo" onclick="showView('home-view')">QuizSphere</div>
+        <div>Login / Register</div>
+    </nav>
+
+    <div id="home-view">
+        <section class="hero">
+            <h1>Create & Take Quizzes Instantly</h1>
+            <p style="margin-bottom: 2rem; opacity: 0.9;">Join thousands of users sharing knowledge through interactive quizzes.</p>
+            <button class="btn btn-create" onclick="showView('create-view')">Create a Quiz</button>
+            <button class="btn btn-take" onclick="showView('list-view')">Take a Quiz</button>
+        </section>
+
+        <div class="main-content">
+            <h2 style="margin-bottom: 1.5rem;">Trending Quizzes</h2>
+            <div id="quiz-list-container" class="grid-layout">
+                </div>
+        </div>
+    </div>
+
+    <div id="create-view" class="main-content hidden">
+        <div class="card">
+            <h2 style="color: var(--primary);">New Quiz Creation</h2>
+            <div class="input-group">
+                <label>Quiz Title</label>
+                <input type="text" id="quiz-title" placeholder="e.g., General Science">
+            </div>
+            <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #eee;">
+            <div id="questions-builder">
+                <h4>Question 1</h4>
+                <input type="text" placeholder="Question Text" class="q-text">
+                <input type="text" placeholder="Option A" class="opt-a">
+                <input type="text" placeholder="Option B" class="opt-b">
+                <input type="text" placeholder="Correct Answer (A or B)" class="correct-opt">
+            </div>
+            <button class="btn btn-create" style="width: 100%; margin-top: 2rem;" onclick="saveQuiz()">Publish Quiz</button>
+        </div>
+    </div>
+
+    <div id="take-view" class="main-content hidden">
+        <div class="card" id="active-quiz-card">
+            </div>
+    </div>
+
+    <script>
+        // Store for local quizzes
+        let quizzes = [
+            { id: 1, title: "Web Basics", questions: [{text: "What does HTML stand for?", a: "HyperText Markup Language", b: "Home Tool Markup Language", correct: "A"}]}
+        ];
+
+        function showView(viewId) {
+            document.getElementById('home-view').classList.add('hidden');
+            document.getElementById('create-view').classList.add('hidden');
+            document.getElementById('take-view').classList.add('hidden');
+            document.getElementById(viewId).classList.remove('hidden');
+            if(viewId === 'home-view') renderQuizList();
+        }
+
+        function renderQuizList() {
+            const container = document.getElementById('quiz-list-container');
+            container.innerHTML = quizzes.map(q => `
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><strong>${q.title}</strong></span>
+                    <button class="btn btn-create" onclick="startQuiz(${q.id})">Start</button>
+                </div>
+            `).join('');
+        }
+
+        function saveQuiz() {
+            const title = document.getElementById('quiz-title').value;
+            const text = document.querySelector('.q-text').value;
+            if(!title || !text) return alert("Please fill out the fields!");
+
+            const newQuiz = {
+                id: Date.now(),
+                title: title,
+                questions: [{
+                    text: text,
+                    a: document.querySelector('.opt-a').value,
+                    b: document.querySelector('.opt-b').value,
+                    correct: document.querySelector('.correct-opt').value.toUpperCase()
+                }]
+            };
+            quizzes.push(newQuiz);
+            alert("Quiz Published Successfully!");
+            showView('home-view');
+        }
+
+        function startQuiz(id) {
+            const quiz = quizzes.find(q => q.id === id);
+            const container = document.getElementById('active-quiz-card');
+            const q = quiz.questions[0]; // Simplified for demo to 1 question
+            
+            container.innerHTML = `
+                <h3 style="margin-bottom: 1rem;">${quiz.title}</h3>
+                <p style="font-size: 1.2rem; margin-bottom: 2rem;">${q.text}</p>
+                <button class="option-btn" onclick="checkAnswer('A', '${q.correct}')">A: ${q.a}</button>
+                <button class="option-btn" onclick="checkAnswer('B', '${q.correct}')">B: ${q.b}</button>
+            `;
+            showView('take-view');
+        }
+
+        function checkAnswer(selected, correct) {
+            if(selected === correct) {
+                alert("Correct! Score: 100%");
+            } else {
+                alert("Incorrect. The right answer was " + correct);
+            }
+            showView('home-view');
+        }
+
+        // Initial Load
+        renderQuizList();
+    </script>
+</body>
+</html>
